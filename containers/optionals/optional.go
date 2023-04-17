@@ -117,9 +117,17 @@ func (optional Optional[T]) Map(fn func(T) T) {
 	optional.value = fn(optional.value)
 }
 
-func (optional Optional[T]) FlatMap(fn func(T) Optional[T]) Optional[T] {
+func (optional Optional[T]) FlatMap(fn func(T) Optional[any]) Optional[any] {
 	if optional.IsEmpty() {
-		return None[T]()
+		return None[any]()
+	}
+
+	return fn(optional.value)
+}
+
+func FlatMap[T any, V any](optional Optional[T], fn func(T) Optional[V]) Optional[V] {
+	if optional.IsEmpty() {
+		return None[V]()
 	}
 
 	return fn(optional.value)
