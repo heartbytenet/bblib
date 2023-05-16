@@ -1,7 +1,7 @@
 package vectors
 
 var (
-	VectorSizeDefault = 1024
+	VectorSizeDefault = 64
 )
 
 type Vector struct {
@@ -70,9 +70,12 @@ func (vector *Vector) ReadAll() (data []byte) {
 
 func (vector *Vector) Consume(size int) (data []byte) {
 
+	var (
+		body []byte
+	)
+
 	if size >= vector.curr {
-		data = make([]byte, vector.curr)
-		copy(data, vector.body)
+		data = vector.body[:vector.curr]
 
 		vector.body = make([]byte, VectorSizeDefault)
 		vector.size = VectorSizeDefault
@@ -87,14 +90,11 @@ func (vector *Vector) Consume(size int) (data []byte) {
 		vector.size /= 2
 	}
 
-	new_vector := make([]byte, vector.curr)
-	copy(new_vector, vector.body[size:])
-
-	data = make([]byte, size)
-	copy(data, vector.body[:size])
+	data = vector.body[:size]
+	body = vector.body[size:]
 
 	vector.body = make([]byte, vector.size)
-	copy(vector.body, new_vector)
+	copy(vector.body, body)
 
 	return
 }
