@@ -22,7 +22,7 @@ func (vector *Vector) Len() int {
 	return vector.curr
 }
 
-func (vector *Vector) Capacity() int {
+func (vector *Vector) Size() int {
 	return vector.size
 }
 
@@ -69,17 +69,32 @@ func (vector *Vector) ReadAll() (data []byte) {
 }
 
 func (vector *Vector) Consume(size int) (data []byte) {
-	data = vector.body[:size]
-	vector.body = vector.body[size:]
 
-	vector.curr -= size
-	if vector.curr < 0 {
+	if size >= vector.curr {
+		data = make([]byte, vector.curr)
+		copy(data, vector.body)
+
+		vector.body = make([]byte, VectorSizeDefault)
+		vector.size = VectorSizeDefault
 		vector.curr = 0
+
+		return
 	}
 
+	vector.curr -= size
+
 	if vector.curr <= vector.size / 2 && vector.size / 2 >= VectorSizeDefault {
-        vector.size /= 2
-    }
+		vector.size /= 2
+	}
+
+	new_vector := make([]byte, vector.curr)
+	copy(new_vector, vector.body[size:])
+
+	data = make([]byte, size)
+	copy(data, vector.body[:size])
+
+	vector.body = make([]byte, vector.size)
+	copy(vector.body, new_vector)
 
 	return
 }
