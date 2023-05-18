@@ -189,3 +189,29 @@ func TestVector_Consume(t *testing.T) {
 		t.Fatal("slice should be empty, instead got", r)
 	}
 }
+
+func TestVector_ReadFrom(t *testing.T) {
+	vector := &Vector{}
+	vector.Init()
+
+	data := []byte("wxyzabcd")
+	_, _ = vector.Write(data)
+
+	if vector.ReadFrom(-1, 2) != nil {
+		t.Fatal("this should be nil")
+	}
+
+	if vector.ReadFrom(0, 0) != nil {
+		t.Fatal("this should be nil")
+	}
+
+	if vector.ReadFrom(0, 10) != nil {
+		t.Fatal("this should be nil")
+	}
+
+	for i, v := range vector.ReadFrom(0, 4) {
+		if data[i] != v {
+			t.Fatal("this should be equal:", v, data[i])
+		}
+	}
+}

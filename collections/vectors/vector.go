@@ -70,8 +70,25 @@ func (vector *Vector) ReadAt(index int) byte {
 	return vector.body[index]
 }
 
+func (vector *Vector) ReadFrom(index int, length int) (data []byte) {
+	if index < 0 {
+		return
+	}
+
+	if index == length {
+		return
+	}
+
+	if (index + length) >= vector.Len() {
+		return
+	}
+
+	data = vector.body[index : index+length][:]
+	return
+}
+
 func (vector *Vector) ReadAll() (data []byte) {
-	data = vector.body[:vector.curr]
+	data = vector.body[:vector.curr][:]
 
 	return
 }
