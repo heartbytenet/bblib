@@ -2,27 +2,23 @@ package vectors
 
 import (
 	"fmt"
+	"strings"
 	"testing"
-	"github.com/heartbytenet/bblib/collections/vectors"
 )
 
-func checkSlicing(t *testing.T, vector *vectors.Vector, size int) {
+func checkSlicing(t *testing.T, vector *Vector, size int) {
 
 	var (
-		slice []byte
-		trueSize int
+		slice        []byte
+		trueSize     int
 		trueCapacity int
-		VectorSizeDefault int
 	)
-
-	VectorSizeDefault = vectors.VectorSizeDefault
 
 	trueCapacity = vector.Size()
 	trueSize = vector.Len() - size
 	if trueSize < 0 {
 		trueSize = 0
 	}
-
 
 	if size > len(vector.ReadAll()) {
 		size = len(vector.ReadAll())
@@ -41,7 +37,7 @@ func checkSlicing(t *testing.T, vector *vectors.Vector, size int) {
 		t.Errorf("Expected size : '%d', but got '%d'", trueSize, vector.Len())
 	}
 
-	if vector.Len() <= trueCapacity / 2 && trueCapacity / 2 >= VectorSizeDefault {
+	if vector.Len() <= trueCapacity/2 && trueCapacity/2 >= VectorSizeDefault {
 		trueCapacity /= 2
 	}
 
@@ -52,7 +48,7 @@ func checkSlicing(t *testing.T, vector *vectors.Vector, size int) {
 }
 
 func TestConsume(t *testing.T) {
-	vector := &vectors.Vector{}
+	vector := &Vector{}
 	vector.Init()
 
 	fmt.Println("-- TESTING BYTES CONSUMPTION --")
@@ -86,4 +82,110 @@ func TestConsume(t *testing.T) {
 	t.Run("CheckSlicing | 10000", func(t *testing.T) {
 		checkSlicing(t, vector, 10000)
 	})
+}
+
+func TestVector_Init(t *testing.T) {
+	vector := &Vector{}
+	vector.Init()
+}
+
+func TestVector_Write(t *testing.T) {
+	vector := &Vector{}
+	vector.Init()
+
+	data := []byte("bla bla bla bla")
+
+	size, err := vector.Write(data)
+	if err != nil {
+		t.Fatal("failed at writing vector:", err)
+	}
+
+	if size != len(data) {
+		t.Fatal("returned length differs")
+	}
+}
+
+func TestVector_Write_Empty(t *testing.T) {
+	vector := &Vector{}
+	vector.Init()
+
+	data := []byte("")
+
+	size, err := vector.Write(data)
+	if err != nil {
+		t.Fatal("failed at writing vector:", err)
+	}
+
+	if size != len(data) {
+		t.Fatal("returned length differs")
+	}
+}
+
+func TestVector_Write_Nil(t *testing.T) {
+	vector := &Vector{}
+	vector.Init()
+
+	size, err := vector.Write(nil)
+	if err != nil {
+		t.Fatal("failed at writing vector:", err)
+	}
+
+	if size != 0 {
+		t.Fatal("this should be zero")
+	}
+}
+
+func TestVector_ReadAt(t *testing.T) {
+	vector := &Vector{}
+	vector.Init()
+
+	if v := vector.ReadAt(10); v != 0 {
+		t.Fatal("this should return zero, got", v, "instead")
+	}
+
+	s := []byte("hello world")
+	_, _ = vector.Write(s)
+
+	for i := range s {
+		if vector.ReadAt(i) != s[i] {
+			t.Fatalf("expected [%v], instead got [%v]", s[i], vector.ReadAt(i))
+		}
+	}
+}
+
+func TestVector_ReadAll(t *testing.T) {
+	vector := &Vector{}
+	vector.Init()
+
+	s := []byte("hello world")
+	_, _ = vector.Write(s)
+	r := vector.ReadAll()
+
+	for i := range s {
+		if r[i] != s[i] {
+			t.Fatalf("expected [%v], instead got [%v]", s[i], r[i])
+		}
+	}
+}
+
+func TestVector_Consume(t *testing.T) {
+	vector := &Vector{}
+	vector.Init()
+
+	s := []byte(strings.Repeat("hello world", 1024*16))
+	_, _ = vector.Write(s)
+
+	for i := range s {
+		x := vector.Consume(1)[0]
+		y := s[i]
+
+		if x != y {
+			t.Fatal("this should not fail")
+		}
+	}
+
+	r := vector.Consume(len(s))
+	if len(r) != 0 {
+		t.Fatal("slice should be empty, instead got", r)
+	}
 }

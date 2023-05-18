@@ -34,23 +34,31 @@ func (vector *Vector) Extend() (size int) {
 	size = vector.size * 2
 	data = make([]byte, size)
 
-	vector.curr = copy(data, vector.body)
+	copy(data, vector.body)
+
 	vector.body = data
 	vector.size = size
 
 	return
 }
 
-func (vector *Vector) Write(data []byte) (size int, err error) {
-	size = len(data)
-
-	if (vector.curr + size) >= vector.size {
+func (vector *Vector) Append(v byte) {
+	for (vector.curr + 1) >= vector.size {
 		vector.Extend()
 	}
 
-	size = copy(vector.body[vector.curr:], data)
-	vector.curr += size
+	vector.body[vector.curr] = v
+	vector.curr++
 
+	return
+}
+
+func (vector *Vector) Write(data []byte) (size int, err error) {
+	for _, v := range data {
+		vector.Append(v)
+	}
+
+	size = len(data)
 	return
 }
 
@@ -86,7 +94,7 @@ func (vector *Vector) Consume(size int) (data []byte) {
 
 	vector.curr -= size
 
-	if vector.curr <= vector.size / 2 && vector.size / 2 >= VectorSizeDefault {
+	if vector.curr <= vector.size/2 && vector.size/2 >= VectorSizeDefault {
 		vector.size /= 2
 	}
 
