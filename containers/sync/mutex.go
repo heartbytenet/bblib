@@ -1,6 +1,11 @@
 package sync
 
-import "sync"
+import (
+	"github.com/heartbytenet/bblib/debug"
+	"log"
+	"reflect"
+	"sync"
+)
 
 type Mutex[T any] struct {
 	value T
@@ -15,10 +20,18 @@ func NewMutex[T any](value T) *Mutex[T] {
 }
 
 func (mutex *Mutex[T]) Lock() {
+	if debug.DEBUG {
+		log.Println("mutex lock", "t:", reflect.TypeOf(mutex.value), "v:", mutex.value)
+	}
+
 	mutex.mutex.Lock()
 }
 
 func (mutex *Mutex[T]) Unlock() {
+	if debug.DEBUG {
+		log.Println("mutex unlock", "t:", reflect.TypeOf(mutex.value), "v:", mutex.value)
+	}
+
 	mutex.mutex.Unlock()
 }
 
