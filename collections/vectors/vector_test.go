@@ -190,6 +190,30 @@ func TestVector_Consume(t *testing.T) {
 	}
 }
 
+func TestVector_Consume_Range(t *testing.T) {
+	vector := &Vector{}
+	vector.Init()
+
+	s := []byte(strings.Repeat("12345678", 1024))
+	_, _ = vector.Write(s)
+
+	for i := 0; i < 1024; i++ {
+		x := vector.Consume(8)
+		y := s
+
+		for j := range x {
+			if x[j] != y[j] {
+				t.Fatal("this should not fail")
+			}
+		}
+	}
+
+	r := vector.Consume(len(s))
+	if len(r) != 0 {
+		t.Fatal("slice should be empty, instead got", r)
+	}
+}
+
 func TestVector_ReadFrom(t *testing.T) {
 	vector := &Vector{}
 	vector.Init()
