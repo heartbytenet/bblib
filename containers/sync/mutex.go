@@ -38,6 +38,12 @@ func (mutex *Mutex[T]) Get() (value T) {
 	return
 }
 
+func (mutex *Mutex[T]) GetForce() (value T) {
+	value = mutex.value
+
+	return
+}
+
 func (mutex *Mutex[T]) Map(fn func(T) T) {
 	if fn == nil {
 		return
