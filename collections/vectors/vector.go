@@ -1,5 +1,9 @@
 package vectors
 
+import (
+	"github.com/heartbytenet/bblib/objects"
+)
+
 var (
 	VectorSizeDefault = 64
 )
@@ -131,5 +135,20 @@ func (vector *Vector) ConsumeWhen(fn func(*Vector) int) (size int, data []byte) 
 	}
 
 	data = vector.Consume(size)
+	return
+}
+
+func NewVector(data []byte) (vector *Vector) {
+	var (
+		err error
+	)
+
+	vector = objects.Init[Vector](&Vector{})
+
+	_, err = vector.Write(data)
+	if err != nil {
+		panic(err)
+	}
+
 	return
 }
