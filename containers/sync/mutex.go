@@ -7,74 +7,74 @@ import (
 	"sync"
 )
 
-type Mutex[T any] struct {
+type Locked[T any] struct {
 	value T
 	mutex sync.Mutex
 }
 
-func NewMutex[T any](value T) *Mutex[T] {
-	return &Mutex[T]{
+func NewLocked[T any](value T) *Locked[T] {
+	return &Locked[T]{
 		value: value,
 		mutex: sync.Mutex{},
 	}
 }
 
-func (mutex *Mutex[T]) Lock() {
+func (locked *Locked[T]) Lock() {
 	if debug.DEBUG {
-		log.Println("mutex lock", "t:", reflect.TypeOf(mutex.value), "v:", mutex.value)
+		log.Println("locked lock", "t:", reflect.TypeOf(locked.value), "v:", locked.value)
 	}
 
-	mutex.mutex.Lock()
+	locked.mutex.Lock()
 }
 
-func (mutex *Mutex[T]) Unlock() {
+func (locked *Locked[T]) Unlock() {
 	if debug.DEBUG {
-		log.Println("mutex unlock", "t:", reflect.TypeOf(mutex.value), "v:", mutex.value)
+		log.Println("mutex unlock", "t:", reflect.TypeOf(locked.value), "v:", locked.value)
 	}
 
-	mutex.mutex.Unlock()
+	locked.mutex.Unlock()
 }
 
-func (mutex *Mutex[T]) Set(value T) {
-	mutex.Lock()
-	defer mutex.Unlock()
+func (locked *Locked[T]) Set(value T) {
+	locked.Lock()
+	defer locked.Unlock()
 
-	mutex.value = value
+	locked.value = value
 }
 
-func (mutex *Mutex[T]) Get() (value T) {
-	mutex.Lock()
-	defer mutex.Unlock()
+func (locked *Locked[T]) Get() (value T) {
+	locked.Lock()
+	defer locked.Unlock()
 
-	value = mutex.value
+	value = locked.value
 
 	return
 }
 
-func (mutex *Mutex[T]) GetForce() (value T) {
-	value = mutex.value
+func (locked *Locked[T]) GetForce() (value T) {
+	value = locked.value
 
 	return
 }
 
-func (mutex *Mutex[T]) Map(fn func(T) T) {
+func (locked *Locked[T]) Map(fn func(T) T) {
 	if fn == nil {
 		return
 	}
 
-	mutex.Lock()
-	defer mutex.Unlock()
+	locked.Lock()
+	defer locked.Unlock()
 
-	mutex.value = fn(mutex.value)
+	locked.value = fn(locked.value)
 }
 
-func (mutex *Mutex[T]) Apply(fn func(T)) {
+func (locked *Locked[T]) Apply(fn func(T)) {
 	if fn == nil {
 		return
 	}
 
-	mutex.Lock()
-	defer mutex.Unlock()
+	locked.Lock()
+	defer locked.Unlock()
 
-	fn(mutex.value)
+	fn(locked.value)
 }
